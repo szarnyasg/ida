@@ -32,4 +32,3 @@ evaluate(query.number.of.types)
 evaluate(query.number.of.triples)
 evaluate(query.number.of.vertices)
 evaluate(query.number.of.edges)
-
