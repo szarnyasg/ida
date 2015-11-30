@@ -21,29 +21,29 @@ public class MetricVisitor extends ElementVisitorBase {
 	protected final String RDF_TYPE = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type";
 	protected final Set<Node> variables = new HashSet<Node>();
 	
-	protected int numberOfTriples = 0;
-	protected int numberOfTypeConstraints = 0;
-	protected int numberOfEdgeConstraints = 0;
-	protected int numberOfAttributeConstraints = 0;
-	protected int numberOfFilterConditions = 0;
-	protected int numberOfOptionalConditions = 0;
+	protected int triples = 0;
+	protected int typeConstraints = 0;
+	protected int edgeConstraints = 0;
+	protected int attributeConstraints = 0;
+	protected int filterConditions = 0;
+	protected int optionalConditions = 0;
 
 	@Override
 	public void visit(final ElementFilter el) {
-		numberOfFilterConditions++;
+		filterConditions++;
 	}
 
 	@Override
 	public void visit(final ElementOptional el) {
-		numberOfOptionalConditions++;
+		optionalConditions++;
 	}
 
 	@Override
 	public void visit(final ElementPathBlock el) {
-		final Iterator<TriplePath> triples = el.patternElts();
+		final Iterator<TriplePath> tripleIterator = el.patternElts();
 
-		while (triples.hasNext()) {
-			final TriplePath triple = triples.next();
+		while (tripleIterator.hasNext()) {
+			final TriplePath triple = tripleIterator.next();
 			logger.debug(triple);
 
 			// subject-predicate-object
@@ -64,15 +64,15 @@ public class MetricVisitor extends ElementVisitorBase {
 			// check if predicate introduces a type constraint
 			if (predicate.isURI()) {
 				if (predicate.getURI().equals(RDF.type.getURI())) {
-					numberOfTypeConstraints++;
+					typeConstraints++;
 				}
 
 				if (subject.isVariable() && object.isVariable()) {
-					numberOfEdgeConstraints++;
+					edgeConstraints++;
 				}
 			}
 
-			numberOfTriples++;
+			triples++;
 		}
 	}
 
@@ -82,28 +82,28 @@ public class MetricVisitor extends ElementVisitorBase {
 		return variables;
 	}
 
-	public int getNumberOfTriples() {
-		return numberOfTriples;
+	public int getTriples() {
+		return triples;
 	}
 
-	public int getNumberOfAttributeConstraints() {
-		return numberOfAttributeConstraints;
+	public int getAttributeConstraints() {
+		return attributeConstraints;
 	}
 
-	public int getNumberOfEdgeConstraints() {
-		return numberOfEdgeConstraints;
+	public int getEdgeConstraints() {
+		return edgeConstraints;
 	}
 
-	public int getNumberOfTypeConstraints() {
-		return numberOfTypeConstraints;
+	public int getTypeConstraints() {
+		return typeConstraints;
 	}
 
-	public int getNumberOfFilterConditions() {
-		return numberOfFilterConditions;
+	public int getFilterConditions() {
+		return filterConditions;
 	}
 
-	public int getNumberOfOptionalConditions() {
-		return numberOfOptionalConditions;
+	public int getOptionalConditions() {
+		return optionalConditions;
 	}
 
 }
