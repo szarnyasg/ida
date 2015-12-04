@@ -16,9 +16,11 @@ public class CoreseMain {
 		
 		final QueryProcess exec = QueryProcess.create(graph);
 		final String query = "select * where {?x ?p ?y}";
-		final Mappings map = exec.query(query);
-		
+		evaluate(exec, query);		
+	}
+
+	private static void evaluate(final QueryProcess exec, final String query) throws EngineException {
+		final Mappings map = exec.query(query);		
 		System.out.println(map);
-		
 	}
 }

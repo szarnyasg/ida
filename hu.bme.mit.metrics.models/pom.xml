@@ -14,12 +14,6 @@
 			<artifactId>kgtool</artifactId>
 			<version>3.1.4-SNAPSHOT</version>
 		</dependency>
-
-		<dependency>
-			<groupId>com.github.jsonld-java</groupId>
-			<artifactId>jsonld-java</artifactId>
-			<version>0.3</version>
-		</dependency>
 	</dependencies>
-	
+
 </project>
