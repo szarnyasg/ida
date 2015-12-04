@@ -15,8 +15,10 @@ public class CoreseMain {
 		ld.load("/home/szarnyasg/git/trainbenchmark/models/railway-minimal-routesensor-inferred.ttl");
 		
 		final QueryProcess exec = QueryProcess.create(graph);
-		final String query = "select * where {?x ?p ?y}";
-		evaluate(exec, query);		
+
+		evaluate(exec, "select * where {?x ?p ?y}");		
+		evaluate(exec, "SELECT (COUNT(DISTINCT ?s) AS ?count) WHERE { { ?s ?_p ?_o } UNION { ?_o ?_p ?s } }");
+		evaluate(exec, "");
 	}
 
 	private static void evaluate(final QueryProcess exec, final String query) throws EngineException {
