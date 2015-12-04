@@ -1,6 +1,7 @@
 library("SPARQL")
 
-SERVER.URL = "http://localhost:5820/trainbenchmark/query"
+#SERVER.URL = "http://localhost:5820/trainbenchmark/query"
+SERVER.URL = "http://localhost:8080/sparql/"
 
 evaluate = function(query) {
   sparql.results = SPARQL(
@@ -32,3 +33,4 @@ evaluate(query.number.of.types)
 evaluate(query.number.of.triples)
 evaluate(query.number.of.vertices)
 evaluate(query.number.of.edges)
+
