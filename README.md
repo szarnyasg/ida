@@ -1,5 +1,8 @@
 # ida
+
 Intelligens Data Analysis homework
+
+[![Build Status](https://travis-ci.org/szarnyasg/ida.svg)](https://travis-ci.org/szarnyasg/ida)
 
 ## Tools
 
