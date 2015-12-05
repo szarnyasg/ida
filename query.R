@@ -1,19 +1,5 @@
 #library("SPARQL")
-
-#SERVER.URL = "http://localhost:5820/trainbenchmark/query"
-SERVER.URL = "http://localhost:8080/sparql"
-
-insert = 'PREFIX foaf: <http://xmlns.com/foaf/0.1/> INSERT DATA { <http://edf.org/resource/dev> foaf:name "dev" . }'
-print(insert)
-
-sparql.results = SPARQL(
-  url = SERVER.URL,
-  query = insert
-)
-
-#query = "SELECT (COUNT(*) AS ?count) WHERE { ?x ?y ?z }"
-#sparql.results = SPARQL(url = SERVER.URL, query = query)
-#sparql.results
+source("SPARQL.R")
 
 evaluate = function(query) {
   sparql.results = SPARQL(
@@ -21,40 +7,46 @@ evaluate = function(query) {
     query = query
   )
   results = sparql.results$results
-  results
+  return(results)
 }
 
-count.hello.world = paste(
-  "SELECT (COUNT(*) as ?count)",
-  "WHERE { ?x ?y ?z }"
-)
-hello.world = paste(
+#SERVER.URL = "http://localhost:5820/trainbenchmark/query" # Stardog
+SERVER.URL = "http://localhost:8080/sparql" #Corese
+
+#model = "/home/szarnyasg/git/trainbenchmark/models/railway-minimal-routesensor-inferred.ttl"
+model = "/home/szarnyasg/git/trainbenchmark/models/railway-repair-1-inferred.ttl"
+
+if (!file.exists(model)) {
+  error.message = paste("File does not exist:", model)
+  stop(error.message)
+}
+
+insert = paste("LOAD <file://", model, "> INTO GRAPH <trainbenchmark>", sep="")
+SPARQL(url = SERVER.URL, query = insert)
+
+query.triples  = paste(
   "SELECT ?x ?y ?z",
   "WHERE { ?x ?y ?z }"
 )
-query.number.of.types = paste(
+query.number.of.vertex.types = paste(
   "SELECT (COUNT(DISTINCT ?t) AS ?count)",
   "WHERE { ?_ rdf:type ?t }"
+)
+query.number.of.edge.types = paste(
+  "SELECT (COUNT(DISTINCT ?p) AS ?count)",
+  "WHERE { ?_s ?p ?_o }"
 )
 query.number.of.triples = paste(
   "SELECT (COUNT(DISTINCT *) AS ?count)",
   "WHERE { ?s ?p ?o }"
 )
 query.number.of.vertices = paste(
-  "SELECT (COUNT(DISTINCT ?s) AS ?count)",
-  "WHERE { { ?s ?_p ?_o } UNION { ?_o ?_p ?s } }"
-)
-query.number.of.edges = paste(
-  "SELECT (COUNT(DISTINCT ?p) AS ?count)",
-  "WHERE { ?_s ?p ?_o }"
+  "SELECT (COUNT(DISTINCT ?r) AS ?count)",
+  "WHERE { { ?r ?_p1 ?_o1 } UNION { ?_s2 ?_p2 ?r } }"
 )
 
-evaluate(count.hello.world)
+print(evaluate(query.number.of.triples))
+print(evaluate(query.number.of.vertex.types))
+print(evaluate(query.number.of.vertices))
+print(evaluate(query.number.of.edge.types))
 
-source("SPARQL.R")
-evaluate(hello.world)
-print(evaluate(count.hello.world))
-#evaluate(query.number.of.types)
-#evaluate(query.number.of.triples)
-#evaluate(query.number.of.vertices)
-#evaluate(query.number.of.edges)
