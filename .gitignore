@@ -14,3 +14,4 @@ vignettes/*.pdf
 
 bin/
 target/
+.Rproj.user

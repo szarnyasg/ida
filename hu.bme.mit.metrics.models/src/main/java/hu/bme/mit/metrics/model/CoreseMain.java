@@ -18,7 +18,10 @@ public class CoreseMain {
 
 		evaluate(exec, "select * where {?x ?p ?y}");		
 		evaluate(exec, "SELECT (COUNT(DISTINCT ?s) AS ?count) WHERE { { ?s ?_p ?_o } UNION { ?_o ?_p ?s } }");
-		evaluate(exec, "");
+		evaluate(exec, "select pathLength($path) as ?length from <G>\n" + 
+				"where {\n" + 
+				"?y s (param[rel])*::$path ?to\n" + 
+				"}order by desc(?length) limit 1 ");
 	}
 
 	private static void evaluate(final QueryProcess exec, final String query) throws EngineException {

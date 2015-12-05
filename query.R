@@ -1,19 +1,25 @@
-library("SPARQL")
+#library("SPARQL")
 
 #SERVER.URL = "http://localhost:5820/trainbenchmark/query"
-SERVER.URL = "http://localhost:8080/kgram/sparql/"
+SERVER.URL = "http://localhost:8080/sparql"
+
+#query = "SELECT (COUNT(*) AS ?count) WHERE { ?x ?y ?z }"
+#sparql.results = SPARQL(url = SERVER.URL, query = query)
+#sparql.results
 
 evaluate = function(query) {
   sparql.results = SPARQL(
     url = SERVER.URL,
     query = query
   )
-  
-  print(sparql.results)
-  
   results = sparql.results$results
+  print(results)
 }
 
+count.hello.world = paste(
+  "SELECT (COUNT(*) as ?count)",
+  "WHERE { ?x ?y ?z }"
+)
 hello.world = paste(
   "SELECT ?x ?y ?z",
   "WHERE { ?x ?y ?z }"
@@ -35,9 +41,12 @@ query.number.of.edges = paste(
   "WHERE { ?_s ?p ?_o }"
 )
 
-evaluate(hello.world)
-evaluate(query.number.of.types)
-evaluate(query.number.of.triples)
-evaluate(query.number.of.vertices)
-evaluate(query.number.of.edges)
+evaluate(count.hello.world)
 
+source("SPARQL.R")
+evaluate(hello.world)
+evaluate(count.hello.world)
+#evaluate(query.number.of.types)
+#evaluate(query.number.of.triples)
+#evaluate(query.number.of.vertices)
+#evaluate(query.number.of.edges)
