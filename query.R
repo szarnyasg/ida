@@ -3,6 +3,14 @@
 #SERVER.URL = "http://localhost:5820/trainbenchmark/query"
 SERVER.URL = "http://localhost:8080/sparql"
 
+insert = 'PREFIX foaf: <http://xmlns.com/foaf/0.1/> INSERT DATA { <http://edf.org/resource/dev> foaf:name "dev" . }'
+print(insert)
+
+sparql.results = SPARQL(
+  url = SERVER.URL,
+  query = insert
+)
+
 #query = "SELECT (COUNT(*) AS ?count) WHERE { ?x ?y ?z }"
 #sparql.results = SPARQL(url = SERVER.URL, query = query)
 #sparql.results
@@ -13,7 +21,7 @@ evaluate = function(query) {
     query = query
   )
   results = sparql.results$results
-  print(results)
+  results
 }
 
 count.hello.world = paste(
@@ -45,7 +53,7 @@ evaluate(count.hello.world)
 
 source("SPARQL.R")
 evaluate(hello.world)
-evaluate(count.hello.world)
+print(evaluate(count.hello.world))
 #evaluate(query.number.of.types)
 #evaluate(query.number.of.triples)
 #evaluate(query.number.of.vertices)
