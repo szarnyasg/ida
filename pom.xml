@@ -15,6 +15,7 @@
 	</properties>
 
 	<modules>
+		<module>hu.bme.mit.metrics.benchmark</module>
 		<module>hu.bme.mit.metrics.models</module>
 		<module>hu.bme.mit.metrics.queries</module>
 	</modules>

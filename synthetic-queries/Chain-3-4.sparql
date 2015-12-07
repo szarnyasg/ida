@@ -1,0 +1,35 @@
+PREFIX base: <http://www.semanticweb.org/ontologies/2015/trainbenchmark#>
+PREFIX rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+
+SELECT DISTINCT ?segment1 ?segment2 ?segment3 ?segment4 ?segment5
+WHERE
+{
+	# segment1-segment2-segment3-segment4-segment5 chain
+	?segment1 base:connectsTo ?segment2 .
+	?segment2 base:connectsTo ?segment3 .
+	?segment3 base:connectsTo ?segment4 .
+	?segment4 base:connectsTo ?segment5 .
+
+	?segment1 rdf:type base:Segment .
+	?segment2 rdf:type base:Segment .
+	?segment3 rdf:type base:Segment .
+	?segment4 rdf:type base:Segment .
+	?segment5 rdf:type base:Segment .
+
+	?segment1 base:length ?segment1_length .
+	?segment2 base:length ?segment2_length .
+	?segment3 base:length ?segment3_length .
+	?segment4 base:length ?segment4_length .
+	?segment5 base:length ?segment5_length .
+
+	# filter operations
+	FILTER (?segment1_length > 0) .
+	FILTER (?segment2_length > 0) .
+	FILTER (?segment3_length > 0) .
+
+	# join operations
+	?segment1 base:sensor ?sensor .
+	?segment2 base:sensor ?sensor .
+	?segment3 base:sensor ?sensor .
+	?segment4 base:sensor ?sensor .
+}

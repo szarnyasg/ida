@@ -20,7 +20,7 @@ public class CoreseMain {
 		evaluate(exec, "SELECT (COUNT(DISTINCT ?s) AS ?count) WHERE { { ?s ?_p ?_o } UNION { ?_o ?_p ?s } }");
 		evaluate(exec, "select pathLength($path) as ?length from <G>\n" + 
 				"where {\n" + 
-				"?y s (param[rel])*::$path ?to\n" + 
+				"?y s (rdf:type])*::$path ?to\n" + 
 				"}order by desc(?length) limit 1 ");
 	}
 

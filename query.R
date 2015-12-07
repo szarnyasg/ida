@@ -6,23 +6,19 @@ evaluate = function(query) {
     url = SERVER.URL,
     query = query
   )
-  results = sparql.results$results
-  return(results)
+  result = sparql.results$results
+  return(result)
+}
+
+evaluate.count = function(query) {
+  result = evaluate(query)
+  result$count
 }
 
 #SERVER.URL = "http://localhost:5820/trainbenchmark/query" # Stardog
 SERVER.URL = "http://localhost:8080/sparql" #Corese
 
-#model = "/home/szarnyasg/git/trainbenchmark/models/railway-minimal-routesensor-inferred.ttl"
-model = "/home/szarnyasg/git/trainbenchmark/models/railway-repair-1-inferred.ttl"
-
-if (!file.exists(model)) {
-  error.message = paste("File does not exist:", model)
-  stop(error.message)
-}
-
-insert = paste("LOAD <file://", model, "> INTO GRAPH <trainbenchmark>", sep="")
-SPARQL(url = SERVER.URL, query = insert)
+### Generic queries
 
 query.triples  = paste(
   "SELECT ?x ?y ?z",
@@ -30,59 +26,64 @@ query.triples  = paste(
 )
 #print(evaluate(query.triples))
 
-### Some general queries
+### Queries for metamodel metrics
 
 query.number.of.vertex.types = paste(
   "SELECT (COUNT(DISTINCT ?t) AS ?count)",
   "WHERE { ?_ rdf:type ?t }"
 )
-print(evaluate(query.number.of.vertex.types))
+#print(evaluate(query.number.of.vertex.types))
 
 query.number.of.edge.types = paste(
   "SELECT (COUNT(DISTINCT ?p) AS ?count)",
   "WHERE { ?_s ?p ?_o }"
 )
-print(evaluate(query.number.of.edge.types))
+#print(evaluate(query.number.of.edge.types))
+
+### Queries for instance model metrics
 
 query.number.of.triples = paste(
   "SELECT (COUNT(DISTINCT *) AS ?count)",
   "WHERE { ?s ?p ?o }"
 )
-print(evaluate(query.number.of.triples))
+#print(evaluate(query.number.of.triples))
 
 query.number.of.vertices = paste(
   "SELECT (COUNT(DISTINCT ?r) AS ?count)",
   "WHERE { { ?r ?_p1 ?_o1 } UNION { ?_s2 ?_p2 ?r } }"
 )
-print(evaluate(query.number.of.vertices))
+#print(evaluate(query.number.of.vertices))
 
-sna.number.of.actors = paste(
-  "PREFIX base: <http://www.semanticweb.org/ontologies/2015/trainbenchmark#>",
-  "select merge",
-  "(count(?x) as ?nbactor)",
-  "where {",
-  "  ?x rdf:type base:Route",
-  "}"
-)
-print(evaluate(sna.number.of.actors))
+#"query.number.of.vertex.types",
+#"query.number.of.edge.types",
 
-sna.diameter = paste(
-  "PREFIX base: <http://www.semanticweb.org/ontologies/2015/trainbenchmark#>",
-  "select pathLength($path) as ?length",
-  "where {",
-  "  ?y s (base:follows)*::$path ?to",
-  "}",
-  "order by desc(?length) limit 1"
-)
-print(evaluate(sna.diameter))
+#evaluate.count(query.number.of.vertex.types),
+#evaluate.count(query.number.of.edge.types),
 
-sna.component = paste(
-  "PREFIX base: <http://www.semanticweb.org/ontologies/2015/trainbenchmark#>",
-  "select ?x ?y",
-  "where {",
-  "  ?x base:follows ?y",
-  "}",
-  "group by any"
-)
-print(evaluate(sna.component))
+attrs = c("size",
+          "query.number.of.triples",
+          "query.number.of.vertices")
+df = data.frame(matrix(ncol = length(attrs), nrow = 0))
+colnames(df) = attrs
 
+for (size in 2^(0:1)) {
+  model = paste("/home/szarnyasg/git/trainbenchmark/models/railway-batch-", size, "-inferred.ttl", sep='')
+  
+  if (!file.exists(model)) {
+    error.message = paste("File does not exist:", model)
+    stop(error.message)
+  }
+  
+  delete = "DELETE { ?s ?p ?o } WHERE { ?s ?p ?o }"
+  SPARQL(url = SERVER.URL, query = delete)
+  
+  insert = paste("LOAD <file://", model, "> INTO GRAPH <trainbenchmark>", sep = "")
+  SPARQL(url = SERVER.URL, query = insert)
+  
+  newrow = c(size,
+             evaluate.count(query.number.of.triples),
+             evaluate.count(query.number.of.vertices))
+  df[nrow(df)+1, ] = newrow
+}
+
+print(df)
