@@ -17,3 +17,7 @@ Query the number of all triples:
 SELECT (COUNT(DISTINCT *) AS ?count)
 WHERE { ?s ?p ?o }
 ```
+
+Corese documentation:
+
+<https://www-sop.inria.fr/acacia/soft/corese/manual/>

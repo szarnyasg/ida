@@ -13,14 +13,22 @@ import org.apache.jena.sparql.syntax.ElementVisitorBase;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.log4j.Logger;
 
-// Based on http://stackoverflow.com/questions/15203838/how-to-get-all-of-the-subjects-of-a-jena-query
+/**
+ * Defines a visitor to collect the metrics from the ARQ query.
+ * 
+ * Based on http://stackoverflow.com/questions/15203838/how-to-get-all-of-the-subjects-of-a-jena-query
+ * 
+ * @author szarnyasg
+ *
+ */
+
 public class MetricVisitor extends ElementVisitorBase {
 
 	protected Logger logger = Logger.getLogger(this.getClass());
-	
+
 	protected final String RDF_TYPE = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type";
-	protected final Set<Node> variables = new HashSet<Node>();
-	
+	protected final Set<Node> variables = new HashSet<>();
+
 	protected int triples = 0;
 	protected int typeConstraints = 0;
 	protected int edgeConstraints = 0;
@@ -51,6 +59,7 @@ public class MetricVisitor extends ElementVisitorBase {
 			final Node predicate = triple.getPredicate();
 			final Node object = triple.getObject();
 
+			// collect variables
 			if (subject.isVariable()) {
 				variables.add(subject);
 			}
@@ -63,10 +72,13 @@ public class MetricVisitor extends ElementVisitorBase {
 
 			// check if predicate introduces a type constraint
 			if (predicate.isURI()) {
+				// check for:type constraints
 				if (predicate.getURI().equals(RDF.type.getURI())) {
 					typeConstraints++;
 				}
 
+				// if both the subject and the object are variables, we consider it an edge constraint
+				// note: rdf type constraints are edge constraints as well
 				if (subject.isVariable() && object.isVariable()) {
 					edgeConstraints++;
 				}
@@ -77,7 +89,7 @@ public class MetricVisitor extends ElementVisitorBase {
 	}
 
 	// getters
-	
+
 	public Set<Node> getVariables() {
 		return variables;
 	}
