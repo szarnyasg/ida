@@ -111,13 +111,12 @@ reload = function() {
 
 
 
-colnames.attrs = c("edge.type",
-                    "indegree",
-                    "outdegree")
-degrees = data.frame(matrix(ncol = length(attrs), nrow = 0))
-colnames(degrees) = colnames.attrs
+width = 200
+height = 100
 
-for(i in 1:nrow(edge.types)) {
+# skip rdf:type
+#for(i in 2:nrow(edge.types)) {
+for(i in 5:5) {
   edge.type = edge.types[i,]
   print(edge.type)
 
@@ -128,28 +127,44 @@ for(i in 1:nrow(edge.types)) {
     "}",
     "GROUP BY ?o"
   )
+  print(query.indegree)
   indegree = evaluate(query.indegree)
   
-  query.outdegree = paste(
-    "SELECT (COUNT(?o) AS ?outdegree)",
-    "WHERE {",
-    "  ?s", edge.type, "?o",
-    "}",
-    "GROUP BY ?s"
-  )
-  outdegree = evaluate(query.outdegree)
-
-  print(indegree)
-  print(outdegree)
- 
-  width = 200
-  height = 100
-  
   plot.indegree = ggplot(data = indegree, aes(indegree)) +
-    geom_histogram(binwidth = 1)
+    geom_histogram(binwidth = 1) +
+    ggtitle(edge.type)
+  print(plot.indegree)
   ggsave(file = paste("diagrams/plot-", i, "-indegree", ".pdf", sep = ""), width = width, height = height, units = "mm")
-
-  plot.outdegree = ggplot(data = outdegree, aes(outdegree)) +
-    geom_histogram(binwidth = 1)
-  ggsave(file = paste("diagrams/plot-", i, "-outdegree", ".pdf", sep = ""), width = width, height = height, units = "mm")
+  
+  ######################################################################
+  
+#  query.outdegree = paste(
+#    "SELECT (COUNT(?o) AS ?outdegree)",
+#    "WHERE {",
+#    "  ?s", edge.type, "?o",
+#    "}",
+#    "GROUP BY ?s"
+#  )
+#  print(query.outdegree)
+#  outdegree = evaluate(query.outdegree)
+  
+#  plot.outdegree = ggplot(data = outdegree, aes(outdegree)) +
+#    geom_histogram(binwidth = 8) +
+#    ggtitle(edge.type)
+#  print(plot.outdegree)
+#  ggsave(file = paste("diagrams/plot-", i, "-outdegree", ".pdf", sep = ""), width = width, height = height, units = "mm")
 }
+
+
+plot.indegree = ggplot(data = indegree, aes(indegree)) +
+  geom_histogram(binwidth = 8) +
+  ggtitle(edge.type)
+print(plot.indegree)
+ggsave(file = paste("diagrams/plot-", i, "-indegree", ".pdf", sep = ""), width = width, height = height, units = "mm")
+
+
+plot.outdegree = ggplot(data = outdegree, aes(outdegree)) +
+  geom_histogram(binwidth = 5) +
+  ggtitle(edge.type)
+print(plot.outdegree)
+ggsave(file = paste("diagrams/plot-", i, "-outdegree", ".pdf", sep = ""), width = width, height = height, units = "mm")
