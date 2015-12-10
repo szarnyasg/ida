@@ -68,12 +68,17 @@ SPARQL <- function(url="http://localhost/", query="", update="",
         
 		    rm(res)
         rm(DOM)
-        
+
         # FIXME: find neater way to unlist columns
-        n = names(df)
-        for(r in 1:length(n)) {
-          name <- n[r]
-          df[name] <- as.vector(unlist(df[name]))
+        if(length(attrs) == 1) {
+          # unlist columns
+          df = unname(unlist(df[1,]))
+        } else {
+          n = names(df)
+          for(r in 1:length(n)) {
+            name <- n[r]
+            df[name] <- as.vector(unlist(df[name]))
+          }
         }
       }
     } else if (format == 'csv') {

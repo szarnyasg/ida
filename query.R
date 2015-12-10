@@ -15,8 +15,8 @@ evaluate.count = function(query) {
   result$count
 }
 
-#SERVER.URL = "http://localhost:5820/trainbenchmark/query" # Stardog
-SERVER.URL = "http://localhost:8080/sparql" #Corese
+SERVER.URL = "http://localhost:5820/ida/query" # Stardog
+#SERVER.URL = "http://localhost:8080/sparql" #Corese
 
 ### Generic queries
 
@@ -28,11 +28,30 @@ query.triples  = paste(
 
 ### Queries for metamodel metrics
 
+query.vertex.types = paste(
+  "SELECT DISTINCT ?x ?t",
+  "WHERE { ?x rdf:type ?t }"
+)
+print(evaluate(query.vertex.types))
+source("SPARQL.R")
+vt = evaluate(query.vertex.types)
+
+
+query.vertex.types1 =
+  paste(
+  "SELECT DISTINCT ?t",
+  "WHERE { ?_ rdf:type ?t }"
+)
+source("SPARQL.R")
+vt1 = evaluate(query.vertex.types1)
+vt1
+
+
 query.number.of.vertex.types = paste(
   "SELECT (COUNT(DISTINCT ?t) AS ?count)",
   "WHERE { ?_ rdf:type ?t }"
 )
-#print(evaluate(query.number.of.vertex.types))
+print(evaluate(query.number.of.vertex.types))
 
 query.number.of.edge.types = paste(
   "SELECT (COUNT(DISTINCT ?p) AS ?count)",
@@ -52,7 +71,7 @@ query.number.of.vertices = paste(
   "SELECT (COUNT(DISTINCT ?r) AS ?count)",
   "WHERE { { ?r ?_p1 ?_o1 } UNION { ?_s2 ?_p2 ?r } }"
 )
-#print(evaluate(query.number.of.vertices))
+print(evaluate(query.number.of.vertices))
 
 #"query.number.of.vertex.types",
 #"query.number.of.edge.types",
@@ -66,24 +85,26 @@ attrs = c("size",
 df = data.frame(matrix(ncol = length(attrs), nrow = 0))
 colnames(df) = attrs
 
-for (size in 2^(0:1)) {
-  model = paste("/home/szarnyasg/git/trainbenchmark/models/railway-batch-", size, "-inferred.ttl", sep='')
+#for (size in 2^(0:0)) {
+size = 1
+model = paste("/home/szarnyasg/git/trainbenchmark/models/railway-batch-", size, "-inferred.ttl", sep='')
   
-  if (!file.exists(model)) {
-    error.message = paste("File does not exist:", model)
-    stop(error.message)
-  }
-  
-  delete = "DELETE { ?s ?p ?o } WHERE { ?s ?p ?o }"
-  SPARQL(url = SERVER.URL, query = delete)
-  
-  insert = paste("LOAD <file://", model, "> INTO GRAPH <trainbenchmark>", sep = "")
-  SPARQL(url = SERVER.URL, query = insert)
-  
-  newrow = c(size,
-             evaluate.count(query.number.of.triples),
-             evaluate.count(query.number.of.vertices))
-  df[nrow(df)+1, ] = newrow
+if (!file.exists(model)) {
+  error.message = paste("File does not exist:", model)
+  stop(error.message)
 }
+
+delete = "DELETE { ?s ?p ?o } WHERE { ?s ?p ?o }"
+SPARQL(url = SERVER.URL, query = delete)
+
+#insert = paste("LOAD <file://", model, "> INTO GRAPH <trainbenchmark>", sep = "")
+insert = paste("LOAD <file://", model, ">", sep = "")
+SPARQL(url = SERVER.URL, query = insert)
+
+
+newrow = c(size,
+           evaluate.count(query.number.of.triples),
+           evaluate.count(query.number.of.vertices))
+df[nrow(df)+1, ] = newrow
 
 print(df)
