@@ -1,4 +1,5 @@
 #library("SPARQL")
+library("ggplot2")
 source("SPARQL.R")
 
 evaluate = function(query) {
@@ -16,9 +17,11 @@ evaluate.count = function(query) {
 }
 
 SERVER.URL = "http://localhost:5820/ida/query" # Stardog
-#SERVER.URL = "http://localhost:8080/sparql" #Corese
+#SERVER.URL = "http://localhost:8080/sparql" # Corese
 
+##############################################################################
 ### Generic queries
+##############################################################################
 
 query.triples  = paste(
   "SELECT ?x ?y ?z",
@@ -26,31 +29,33 @@ query.triples  = paste(
 )
 #print(evaluate(query.triples))
 
+##############################################################################
 ### Queries for metamodel metrics
+##############################################################################
+
+#### Vertex types
 
 query.vertex.types = paste(
   "SELECT DISTINCT ?t",
   "WHERE { ?_ rdf:type ?t }"
 )
-source("SPARQL.R")
-vt1 = evaluate(query.vertex.types)
-print(vt1)
-
-query.vertex.types2 =
-  paste(
-  "SELECT DISTINCT ?x ?t",
-  "WHERE { ?x rdf:type ?t }"
-)
-source("SPARQL.R")
-vt2 = evaluate(query.vertex.types2)
-print(vt2)
-
+vertex.types = evaluate(query.vertex.types)
+#print(vertex.types)
 
 query.number.of.vertex.types = paste(
   "SELECT (COUNT(DISTINCT ?t) AS ?count)",
   "WHERE { ?_ rdf:type ?t }"
 )
-print(evaluate(query.number.of.vertex.types))
+#print(evaluate(query.number.of.vertex.types))
+
+#### Edge type
+
+query.edge.types = paste(
+  "SELECT DISTINCT ?p",
+  "WHERE { ?_s ?p ?_o }"
+)
+edge.types = evaluate(query.edge.types)
+#print(edge.types)
 
 query.number.of.edge.types = paste(
   "SELECT (COUNT(DISTINCT ?p) AS ?count)",
@@ -58,7 +63,9 @@ query.number.of.edge.types = paste(
 )
 #print(evaluate(query.number.of.edge.types))
 
+##############################################################################
 ### Queries for instance model metrics
+##############################################################################
 
 query.number.of.triples = paste(
   "SELECT (COUNT(DISTINCT *) AS ?count)",
@@ -93,17 +100,56 @@ if (!file.exists(model)) {
   stop(error.message)
 }
 
-delete = "DELETE { ?s ?p ?o } WHERE { ?s ?p ?o }"
-SPARQL(url = SERVER.URL, query = delete)
+reload = function() {
+  delete = "DELETE { ?s ?p ?o } WHERE { ?s ?p ?o }"
+  SPARQL(url = SERVER.URL, query = delete)
+  
+  #insert = paste("LOAD <file://", model, "> INTO GRAPH <trainbenchmark>", sep = "")
+  insert = paste("LOAD <file://", model, ">", sep = "")
+  SPARQL(url = SERVER.URL, query = insert)
+}
 
-#insert = paste("LOAD <file://", model, "> INTO GRAPH <trainbenchmark>", sep = "")
-insert = paste("LOAD <file://", model, ">", sep = "")
-SPARQL(url = SERVER.URL, query = insert)
 
 
-newrow = c(size,
-           evaluate.count(query.number.of.triples),
-           evaluate.count(query.number.of.vertices))
-df[nrow(df)+1, ] = newrow
+colnames.attrs = c("edge.type",
+                    "indegree",
+                    "outdegree")
+degrees = data.frame(matrix(ncol = length(attrs), nrow = 0))
+colnames(degrees) = colnames.attrs
 
-print(df)
+for(i in 1:nrow(edge.types)) {
+  edge.type = edge.types[i,]
+  print(edge.type)
+
+  query.indegree = paste(
+    "SELECT (COUNT(?s) AS ?indegree)",
+    "WHERE {",
+    "  ?s", edge.type, "?o",
+    "}",
+    "GROUP BY ?o"
+  )
+  indegree = evaluate(query.indegree)
+  
+  query.outdegree = paste(
+    "SELECT (COUNT(?o) AS ?outdegree)",
+    "WHERE {",
+    "  ?s", edge.type, "?o",
+    "}",
+    "GROUP BY ?s"
+  )
+  outdegree = evaluate(query.outdegree)
+
+  print(indegree)
+  print(outdegree)
+ 
+  width = 200
+  height = 100
+  
+  plot.indegree = ggplot(data = indegree, aes(indegree)) +
+    geom_histogram(binwidth = 1)
+  ggsave(file = paste("diagrams/plot-", i, "-indegree", ".pdf", sep = ""), width = width, height = height, units = "mm")
+
+  plot.outdegree = ggplot(data = outdegree, aes(outdegree)) +
+    geom_histogram(binwidth = 1)
+  ggsave(file = paste("diagrams/plot-", i, "-outdegree", ".pdf", sep = ""), width = width, height = height, units = "mm")
+}
