@@ -72,7 +72,10 @@ SPARQL <- function(url="http://localhost/", query="", update="",
         # FIXME: find neater way to unlist columns
         if(length(attrs) == 1) {
           # unlist columns
-          df = unname(unlist(df[1,]))
+          colname = colnames(df)[1]
+          vec = unname(unlist(df[1,]))
+          df = data.frame(vec)
+          colnames(df) = c(colname)
         } else {
           n = names(df)
           for(r in 1:length(n)) {

@@ -29,22 +29,21 @@ query.triples  = paste(
 ### Queries for metamodel metrics
 
 query.vertex.types = paste(
-  "SELECT DISTINCT ?x ?t",
-  "WHERE { ?x rdf:type ?t }"
-)
-print(evaluate(query.vertex.types))
-source("SPARQL.R")
-vt = evaluate(query.vertex.types)
-
-
-query.vertex.types1 =
-  paste(
   "SELECT DISTINCT ?t",
   "WHERE { ?_ rdf:type ?t }"
 )
 source("SPARQL.R")
-vt1 = evaluate(query.vertex.types1)
-vt1
+vt1 = evaluate(query.vertex.types)
+print(vt1)
+
+query.vertex.types2 =
+  paste(
+  "SELECT DISTINCT ?x ?t",
+  "WHERE { ?x rdf:type ?t }"
+)
+source("SPARQL.R")
+vt2 = evaluate(query.vertex.types2)
+print(vt2)
 
 
 query.number.of.vertex.types = paste(
